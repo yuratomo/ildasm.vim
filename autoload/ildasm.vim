@@ -28,9 +28,9 @@ function! ildasm#start()
 endfunction
 
 function! ildasm#exit()
-  if !exists('g:assembly_list')
-    unlet g:assembly_list
-  endif
+" if !exists('g:assembly_list')
+"   unlet g:assembly_list
+" endif
 endfunction
 
 function! ildasm#open()
@@ -107,6 +107,9 @@ function! s:load()
   if !exists('g:ildasm_assemblies')
     return -1
   endif
+  if exists('g:assembly_list')
+    return 0
+  endif
 
   let g:assembly_list = []
   for path in g:ildasm_assemblies
@@ -115,6 +118,6 @@ function! s:load()
     echo 'ildasm: loading ' . path . ' ... '
     call add(g:assembly_list, { 'path' : path, 'classes' : classes })
   endfor
-  return 0
+  return 1
 endfunction
 
