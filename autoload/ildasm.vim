@@ -111,6 +111,8 @@ function! s:load()
   let g:assembly_list = []
   for path in g:ildasm_assemblies
     let classes = ildasm#api#getClassList(path)
+    redraw
+    echo 'ildasm: loading ' . path . ' ... '
     call add(g:assembly_list, { 'path' : path, 'classes' : classes })
   endfor
   return 0

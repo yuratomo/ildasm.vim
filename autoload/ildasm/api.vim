@@ -7,7 +7,7 @@ function! ildasm#api#getClassList(path)
     \ '/PUBONLY', 
     \ '| findstr ^\.class'
     \ ],  ' ')
-  return map(split(system(cmd), '\n'), 'substitute(v:val, ".* ", "", "")')
+  return map(split(s:system(cmd), '\n'), 'substitute(v:val, ".* ", "", "")')
 endfunction
 
 function! ildasm#api#getClassInfo(path, class)
@@ -22,6 +22,13 @@ function! ildasm#api#getClassInfo(path, class)
     \ '|findstr /V }',
     \ '|findstr /V \/\/',
     \ ],  ' ')
-  return system(cmd)
+  return s:system(cmd)
 endfunction
 
+function! s:system(string)
+" if exists('g:loaded_vimproc')
+"   return vimproc#system(a:string)
+" else
+    return system(a:string)
+" endif
+endfunction
