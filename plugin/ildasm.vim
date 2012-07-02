@@ -4,7 +4,10 @@
 " Usage:
 "
 "   1.append _vimrc
-"     call ildasm#addAssembly('C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\WindowsBase.dll')
+"     let g:ildasm_assemblies = [
+"       \ 'C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\WindowsBase.dll'
+"       \ 'C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\PresentationCore.dll'
+"       \ ]
 "
 "   2.:Ildasm<ENTER>
 "

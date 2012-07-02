@@ -10,6 +10,7 @@ function! s:usage()
   echo "   1.append _vimrc following settings"
   echo "     let g:ildasm_assemblies = ["
   echo "       \ 'C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\WindowsBase.dll'"
+  echo "       \ 'C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\PresentationCore.dll'"
   echo "       \ ]"
   echo ""
   echo "   2.:Ildasm<ENTER>"
