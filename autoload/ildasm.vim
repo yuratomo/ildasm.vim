@@ -1,4 +1,3 @@
-
 let [ s:MODE_LIST, s:MODE_BODY ] = range(2)
 let s:ildasm_title_prefix = 'ildasm-'
 let s:ildasm_separator = '    - '
@@ -24,8 +23,7 @@ function! ildasm#start()
     return
   endif
   call s:openWindow()
-  let s:ildasm_mode = s:MODE_LIST
-  call s:show()
+  call s:list()
 endfunction
 
 function! ildasm#exit()
@@ -36,8 +34,38 @@ endfunction
 
 function! ildasm#open()
   if s:ildasm_mode == s:MODE_LIST
-    let s:ildasm_mode = s:MODE_BODY
+    let g:ildasm_line = line('.')
     call s:show()
+  elseif s:ildasm_mode == s:MODE_BODY
+    let pos = col('.')
+    let cline = getline('.')
+    let s = strridx(cline, ' ', pos)
+    let e = stridx(cline, ' ', pos)
+    if s == -1
+      let s = 0
+    else
+      let s += 1
+    endif
+    if e == -1
+      let e = len(cline) - 1
+    else
+      let e -= 1
+    endif
+    let word = cline[ s : e ]
+    if stridx(word, '.') > 0
+      let idx=1
+      for assembly in g:assembly_list
+        let path = assembly.path
+        for class in assembly.classes
+          if class == word
+            let g:ildasm_line = idx
+            call s:show([ class , path ])
+            break
+          endif
+          let idx += 1
+        endfor
+      endfor
+    endif
   endif
 endfunction
 
@@ -45,8 +73,7 @@ function! ildasm#back()
   if s:ildasm_mode == s:MODE_LIST
     bd!
   elseif s:ildasm_mode == s:MODE_BODY
-    let s:ildasm_mode = s:MODE_LIST
-    call s:show()
+    call s:list()
     call cursor(g:ildasm_line, 0)
   endif
 endfunction
@@ -69,7 +96,7 @@ function! s:openWindow()
 
   new
   silent edit `=bufname`
-  setl bt=nofile noswf nowrap hidden nolist nomodifiable ft=cs
+  setl bt=nofile noswf nowrap hidden nolist nomodifiable ft=ildasm
   augroup ildasm
     au!
     exe 'au BufDelete <buffer> call ildasm#exit()'
@@ -78,29 +105,34 @@ function! s:openWindow()
   nnoremap <buffer> <BS> :call ildasm#back()<CR>
 endfunction
 
-function! s:show()
-  if s:ildasm_mode == s:MODE_LIST
+function! s:list()
+  let s:ildasm_mode = s:MODE_LIST
+  setl modifiable
+  % delete _
+  let idx=1
+  for assembly in g:assembly_list
+    let path = assembly.path
+    for class in assembly.classes
+      call setline(idx, class . s:ildasm_separator . path)
+      let idx += 1
+    endfor
+  endfor
+  setl nomodifiable
+endfunction
+
+function! s:show(...)
+  let s:ildasm_mode = s:MODE_BODY
+  if len(a:000) > 0
+    let part = a:1
+  else
+    let part = split(getline('.'), s:ildasm_separator)
+  endif
+  if len(part) >= 2
     setl modifiable
     % delete _
-    let idx=1
-    for assembly in g:assembly_list
-      let path = assembly.path
-      for class in assembly.classes
-        call setline(idx, class . s:ildasm_separator . path)
-        let idx += 1
-      endfor
-    endfor
+    call setline(1, split(ildasm#api#getClassInfo(part[1],part[0]), '\n'))
     setl nomodifiable
-  elseif s:ildasm_mode == s:MODE_BODY
-    let g:ildasm_line = line('.')
-    let part = split(getline('.'), s:ildasm_separator)
-    if len(part) >= 2
-      setl modifiable
-      % delete _
-      call setline(1, split(ildasm#api#getClassInfo(part[1],part[0]), '\n'))
-      setl nomodifiable
-      call cursor(1,0)
-    endif
+    call cursor(1,0)
   endif
 endfunction
 

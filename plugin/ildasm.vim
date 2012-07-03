@@ -1,5 +1,5 @@
 " File: plugin/ildasm.vim
-" Last Modified: 2012.07.01
+" Last Modified: 2012.07.04
 " Author: yuratomo (twitter @yusetomo)
 " Usage:
 "
@@ -17,7 +17,7 @@ if exists('g:loaded_ildasm') && g:loaded_ildasm == 1
 endif
 
 if !exists('g:ildasm_command')
-  let g:ildasm_command = shellescape('C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\ildasm.exe')
+  let g:ildasm_command = shellescape('ildasm.exe')
 endif
 
 command! -nargs=* 
