@@ -5,9 +5,10 @@ function! ildasm#api#getClassList(path)
     \ shellescape(a:path), 
     \ '/TEXT', 
     \ '/PUBONLY', 
-    \ '| findstr ^\.class '
+    \ '|findstr \.class ',
+    \ '|findstr /V Enumerator',
     \ ],  ' ')
-  return map(split(s:system(cmd), '\n'), 'substitute(v:val, ".* ", "", "")')
+  return map(map(split(s:system(cmd), '\n'), 'substitute(v:val, "\d*<.*>", "", "")'), 'substitute(v:val, ".* ", "", "")')
 endfunction
 
 function! ildasm#api#getClassInfo(path, class)
