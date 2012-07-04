@@ -20,9 +20,8 @@ if !exists('g:ildasm_command')
   let g:ildasm_command = shellescape('ildasm.exe')
 endif
 
-command! -nargs=* 
-  \ Ildasm
-  \ :call ildasm#start()
+command! -nargs=* Ildasm      :call ildasm#start(0)
+command! -nargs=* IldasmSplit :call ildasm#start(1)
 
 let g:loaded_ildasm = 1
 

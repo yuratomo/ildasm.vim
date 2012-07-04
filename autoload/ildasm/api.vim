@@ -5,7 +5,7 @@ function! ildasm#api#getClassList(path)
     \ shellescape(a:path), 
     \ '/TEXT', 
     \ '/PUBONLY', 
-    \ '| findstr ^\.class'
+    \ '| findstr ^\.class '
     \ ],  ' ')
   return map(split(s:system(cmd), '\n'), 'substitute(v:val, ".* ", "", "")')
 endfunction
@@ -21,6 +21,7 @@ function! ildasm#api#getClassInfo(path, class)
     \ '|findstr /V {',
     \ '|findstr /V }',
     \ '|findstr /V \/\/',
+    \ '|findstr /V .maxstack',
     \ ],  ' ')
   return s:system(cmd)
 endfunction

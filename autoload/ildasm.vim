@@ -2,7 +2,6 @@ let [ s:MODE_LIST, s:MODE_BODY ] = range(2)
 let s:ildasm_title_prefix = 'ildasm-'
 let s:ildasm_separator = '    - '
 let s:ildasm_mode = s:MODE_LIST
-let g:ildasm_line = 0
 
 function! s:usage()
   echo "[USAGE]"
@@ -16,25 +15,23 @@ function! s:usage()
   echo ""
 endfunction
 
-function! ildasm#start()
+function! ildasm#start(mode)
   let ret = s:load()
   if ret == -1
     call s:usage()
     return
   endif
-  call s:openWindow()
+  call s:openWindow(a:mode)
   call s:list()
 endfunction
 
 function! ildasm#exit()
-" if !exists('g:assembly_list')
-"   unlet g:assembly_list
-" endif
+  bd
 endfunction
 
 function! ildasm#open()
   if s:ildasm_mode == s:MODE_LIST
-    let g:ildasm_line = line('.')
+    let b:ildasm_line = line('.')
     call s:show()
   elseif s:ildasm_mode == s:MODE_BODY
     let pos = col('.')
@@ -58,7 +55,7 @@ function! ildasm#open()
         let path = assembly.path
         for class in assembly.classes
           if class == word
-            let g:ildasm_line = idx
+            let b:ildasm_line = idx
             call s:show([ class , path ])
             break
           endif
@@ -74,29 +71,23 @@ function! ildasm#back()
     bd!
   elseif s:ildasm_mode == s:MODE_BODY
     call s:list()
-    call cursor(g:ildasm_line, 0)
+    call cursor(b:ildasm_line, 0)
   endif
 endfunction
 
-function! s:openWindow()
-  let winnum = winnr('$')
-  for winno in range(1, winnum)
-    let bufname = bufname(winbufnr(winno))
-    if bufname =~ s:ildasm_title_prefix
-       exe winno . "wincmd w"
-       return
-    endif
-  endfor
-
+function! s:openWindow(mode)
   let id = 1
   while buflisted(s:ildasm_title_prefix . id)
     let id += 1
   endwhile
   let bufname = s:ildasm_title_prefix . id
 
-  new
+  if a:mode == 1
+    new
+  endif
   silent edit `=bufname`
   setl bt=nofile noswf nowrap hidden nolist nomodifiable ft=ildasm
+  let b:ildasm_line = 0
   augroup ildasm
     au!
     exe 'au BufDelete <buffer> call ildasm#exit()'
