@@ -4,15 +4,25 @@ let s:ildasm_separator = '    - '
 let s:ildasm_mode = s:MODE_LIST
 
 function! s:usage()
-  echo "[USAGE]"
-  echo "   1.append _vimrc following settings"
-  echo "     let g:ildasm_assemblies = ["
-  echo "       \ 'C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\WindowsBase.dll'"
-  echo "       \ 'C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\PresentationCore.dll'"
-  echo "       \ ]"
-  echo ""
-  echo "   2.:Ildasm<ENTER>"
-  echo ""
+  new
+  let bufname = s:ildasm_title_prefix
+  silent edit `=bufname`
+  let help= [
+    \ "[USAGE]",
+    \ "1. Append your _vimrc following settings.",
+    \ "",
+    \ "let g:ildasm_assemblies = [",
+    \ " \\ 'C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\WindowsBase.dll'",
+    \ " \\ 'C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\PresentationCore.dll'",
+    \ " \\ 'C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\PresentationFramework.dll'",
+    \ " \\ ]",
+    \ "",
+    \ "2. Input command \":Ildasm<ENTER>\"",
+    \ "",
+    \ "",
+    \ ]
+  call setline(1,help)
+  setl bt=nofile noswf nowrap hidden nolist nomodifiable ft=vim
 endfunction
 
 function! ildasm#start(mode)
