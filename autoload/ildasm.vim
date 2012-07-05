@@ -45,9 +45,16 @@ function! ildasm#open()
     call s:show()
   elseif s:ildasm_mode == s:MODE_BODY
     let pos = col('.')
+    let tline = getline(1)
     let cline = getline('.')
-    let s = strridx(cline, ' ', pos)
-    let e = stridx(cline, ' ', pos)
+    let s1 = strridx(cline, ' ', pos)
+    let s2 = strridx(cline, ']', pos)
+    if s1 > s2
+      let s = s1
+    else
+      let s = s2
+    endif
+    let e = matchstr(cline, '[^a-zA-Z0-9.]', pos)
     if s == -1
       let s = 0
     else
@@ -58,18 +65,31 @@ function! ildasm#open()
     else
       let e -= 1
     endif
+
     let word = cline[ s : e ]
     if stridx(word, '.') > 0
       let idx=1
-      for assembly in g:assembly_list
-        let path = assembly.path
-        for class in assembly.classes
-          if class == word
-            let b:ildasm_line = idx
-            call s:show([ class , path ])
-            break
+      for mode in [0, 1]
+        for assembly in g:assembly_list
+          let path = assembly.path
+          if mode == 0
+            " first same search in assembly
+            if path != tline
+              continue
+            endif
+          else
+            if path == tline
+              continue
+            endif
           endif
-          let idx += 1
+          for class in assembly.classes
+            if class == word
+              let b:ildasm_line = idx
+              call s:show([ class , path ])
+              break
+            endif
+            let idx += 1
+          endfor
         endfor
       endfor
     endif
@@ -109,6 +129,7 @@ endfunction
 function! s:list()
   let s:ildasm_mode = s:MODE_LIST
   setl modifiable
+  call clearmatches()
   % delete _
   let idx=1
   for assembly in g:assembly_list
@@ -130,8 +151,12 @@ function! s:show(...)
   endif
   if len(part) >= 2
     setl modifiable
+    call clearmatches()
     % delete _
-    call setline(1, split(ildasm#api#getClassInfo(part[1],part[0]), '\n'))
+    call matchadd("ildasmHeader", '\%1l')
+    exe 'syn match ildasmCurrent "' . part[0] . '"'
+    call setline(1, part[1])
+    call setline(2, ildasm#api#getClassInfo(part[1],part[0]))
     setl nomodifiable
     call cursor(1,0)
   endif

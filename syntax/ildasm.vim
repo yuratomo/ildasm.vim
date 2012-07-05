@@ -17,7 +17,7 @@ syn match   ildasmRemoveon "^ *.removeon \_.\{-})"
 syn match   ildasmHide     "^.*hidebysig .*$\n\_.\{-}\n^$"
 syn match   ildasmIL       "IL_\x\x\x\x:.*$"
 syn match   ildasmKakko    "\[\a*\]"
-syn match   ildasmClass    "^\w[^ ]*"
+syn match   ildasmClass    "^[A-Z][a-zA-Z0-9.]*"
 
 hi default link ildasmIgnore   Ignore
 hi default link ildasmKeyword  Type
@@ -32,5 +32,7 @@ hi default link ildasmAddon    Ignore
 hi default link ildasmRemoveon Ignore
 hi default link ildasmKakko    Comment
 hi default link ildasmClass    Function
+hi default link ildasmCurrent  Function
+hi default link ildasmHeader   Underlined
 
 let b:current_syntax = 'ildasm'

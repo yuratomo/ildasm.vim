@@ -24,7 +24,23 @@ function! ildasm#api#getClassInfo(path, class)
     \ '|findstr /V \/\/',
     \ '|findstr /V .maxstack',
     \ ],  ' ')
-  return s:system(cmd)
+
+  " negrect
+  let nlist = []
+  let list = split(s:system(cmd), '\n')
+  let on = 0
+  for item in list
+    if item =~ " hidebysig "
+      let on = 1
+    endif
+    if on == 0 || item =~ "IL_\x\x\x\x:.*$"
+      call add(nlist, item)
+    endif
+    if item == ""
+      let on = 0
+    endif
+  endfor
+  return nlist
 endfunction
 
 function! s:system(string)
