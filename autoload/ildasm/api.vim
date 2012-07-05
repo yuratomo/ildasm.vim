@@ -17,7 +17,6 @@ function! ildasm#api#getClassInfo(path, class)
     \ shellescape(a:path),
     \ '/ITEM:' . a:class ,
     \ '/TEXT',
-    \ '/PUBONLY',
     \ '/NOCA',
     \ '|findstr /V {',
     \ '|findstr /V }',
