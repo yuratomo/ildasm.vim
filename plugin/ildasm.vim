@@ -20,6 +20,10 @@ if !exists('g:ildasm_command')
   let g:ildasm_command = shellescape('ildasm.exe')
 endif
 
+if !exists("g:ildasm_cache")
+  let g:ildasm_cache = $home.'\\.vim_ildasm'
+endif
+
 command! -nargs=* Ildasm      :call ildasm#start(0)
 command! -nargs=* IldasmSplit :call ildasm#start(1)
 

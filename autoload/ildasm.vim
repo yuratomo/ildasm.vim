@@ -33,6 +33,13 @@ function! ildasm#start(mode)
   endif
   call s:openWindow(a:mode)
   call s:list()
+  if ret == 1
+    try
+      execute "write" fnameescape(g:ildasm_cache)
+    catch /^Vim(write):/
+      throw "EXCEPT:IO(" . getcwd() . ", " . a:file . "):WRITEERR"
+    endtry
+  endif
 endfunction
 
 function! ildasm#exit()
@@ -54,7 +61,7 @@ function! ildasm#open()
     else
       let s = s2
     endif
-    let e = matchstr(cline, '[^a-zA-Z0-9.]', pos)
+    let e = stridx(cline, ' ', pos)
     if s == -1
       let s = 0
     else
@@ -86,13 +93,14 @@ function! ildasm#open()
             if class == word
               let b:ildasm_line = idx
               call s:show([ class , path ])
-              break
+              return
             endif
             let idx += 1
           endfor
         endfor
       endfor
     endif
+    echo word . ' not found'
   endif
 endfunction
 
@@ -143,22 +151,26 @@ function! s:list()
 endfunction
 
 function! s:show(...)
+  let idx = 1
   let s:ildasm_mode = s:MODE_BODY
   if len(a:000) > 0
     let part = a:1
+    let idx = line('$') + 1
   else
     let part = split(getline('.'), s:ildasm_separator)
   endif
   if len(part) >= 2
     setl modifiable
-    call clearmatches()
-    % delete _
-    call matchadd("ildasmHeader", '\%1l')
+    if idx == 1
+      call clearmatches()
+      % delete _
+    endif
+    call matchadd("ildasmHeader", '\%' . idx . 'l')
     exe 'syn match ildasmCurrent "' . part[0] . '"'
-    call setline(1, part[1])
-    call setline(2, ildasm#api#getClassInfo(part[1],part[0]))
+    call setline(idx, part[1])
+    call setline(idx+1, ildasm#api#getClassInfo(part[1],part[0]))
     setl nomodifiable
-    call cursor(1,0)
+    call cursor(idx+1,0)
   endif
 endfunction
 
@@ -171,6 +183,28 @@ function! s:load()
   endif
 
   let g:assembly_list = []
+  let path = ''
+  let classes = []
+  if filereadable(g:ildasm_cache)
+    let lines = readfile(g:ildasm_cache)
+    for line in lines
+      let part = split(line, s:ildasm_separator)
+      if path != part[1]
+        if path != ''
+          call add(g:assembly_list, { 'path' : path, 'classes' : classes })
+        endif
+        let classes = []
+        let path = part[1]
+      endif
+      call add(classes, part[0])
+    endfor
+    if path != ''
+      call add(g:assembly_list, { 'path' : path, 'classes' : classes })
+    endif
+    echo 'ildasm: load from cache ( ' . g:ildasm_cache . ' )'
+    return 0
+  endif
+
   for path in g:ildasm_assemblies
     let classes = ildasm#api#getClassList(path)
     redraw
