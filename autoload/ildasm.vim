@@ -31,11 +31,13 @@ function! ildasm#start(mode)
     call s:usage()
     return
   endif
+
   call s:openWindow(a:mode)
   call s:list()
+
   if ret == 1
     try
-      execute "write" fnameescape(g:ildasm_cache)
+      exe "write" fnameescape(g:ildasm_cache)
     catch /^Vim(write):/
       throw "EXCEPT:IO(" . getcwd() . ", " . a:file . "):WRITEERR"
     endtry
@@ -150,6 +152,15 @@ function! s:list()
   setl nomodifiable
 endfunction
 
+function! s:listFromCache()
+  let s:ildasm_mode = s:MODE_LIST
+  setl modifiable
+  call clearmatches()
+  % delete _
+  exe "read" fnameescape(g:ildasm_cache)
+  setl nomodifiable
+endfunction
+
 function! s:show(...)
   let idx = 1
   let s:ildasm_mode = s:MODE_BODY
@@ -202,7 +213,7 @@ function! s:load()
       call add(g:assembly_list, { 'path' : path, 'classes' : classes })
     endif
     echo 'ildasm: load from cache ( ' . g:ildasm_cache . ' )'
-    return 0
+    return 2
   endif
 
   for path in g:ildasm_assemblies
@@ -212,5 +223,16 @@ function! s:load()
     call add(g:assembly_list, { 'path' : path, 'classes' : classes })
   endfor
   return 1
+endfunction
+
+function ildasm#clearCache()
+  if exists('g:assembly_list')
+    unlet g:assembly_list
+  endif
+  call delete(g:ildasm_cache)
+  call s:load()
+  if exists('b:ildasm_line')
+    call s:list()
+  endif
 endfunction
 
