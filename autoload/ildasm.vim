@@ -102,7 +102,7 @@ function! ildasm#open()
         endfor
       endfor
     endif
-    echo word . ' not found'
+    call s:message(word . ' not found')
   endif
 endfunction
 
@@ -212,14 +212,14 @@ function! s:load()
     if path != ''
       call add(g:assembly_list, { 'path' : path, 'classes' : classes })
     endif
-    echo 'ildasm: load from cache ( ' . g:ildasm_cache . ' )'
+    call s:message( 'load from cache ( ' . g:ildasm_cache . ' )')
     return 2
   endif
 
   for path in g:ildasm_assemblies
     let classes = ildasm#api#getClassList(path)
     redraw
-    echo 'ildasm: loading ' . path . ' ... '
+    call s:message( 'loading ' . path . ' ... ')
     call add(g:assembly_list, { 'path' : path, 'classes' : classes })
   endfor
   return 1
@@ -236,3 +236,7 @@ function ildasm#clearCache()
   endif
 endfunction
 
+function s:message(msg)
+  redraw
+  echo 'ildasm: ' . a:msg
+endfunction
