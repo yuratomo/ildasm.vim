@@ -29,7 +29,7 @@ function! ildasm#api#getClassInfo(path, class)
   let list = split(s:system(cmd), '\n')
   let on = 0
   for item in list
-    if item =~ " hidebysig " || item =~ 'IL_\x\x\x\x:.*$'
+    if item =~ 'IL_\x\x\x\x:.*$'
       let on = 1
     endif
     if on == 0

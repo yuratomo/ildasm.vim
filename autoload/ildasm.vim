@@ -219,7 +219,7 @@ function! s:load()
   for path in g:ildasm_assemblies
     let classes = ildasm#api#getClassList(path)
     redraw
-    call s:message( 'loading ' . path . ' ... ')
+    call s:message( 'loading ' . substitute(path, ".*\\", '', 'g') . ' ... ')
     call add(g:assembly_list, { 'path' : path, 'classes' : classes })
   endfor
   return 1
@@ -230,10 +230,7 @@ function ildasm#clearCache()
     unlet g:assembly_list
   endif
   call delete(g:ildasm_cache)
-  call s:load()
-  if exists('b:ildasm_line')
-    call s:list()
-  endif
+  call s:message('Cache cleared!!')
 endfunction
 
 function s:message(msg)

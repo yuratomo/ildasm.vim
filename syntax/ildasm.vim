@@ -9,12 +9,11 @@ syn keyword ildasmIgnore   module assembly forwarder extern imagebase file stack
 syn keyword ildasmKeyword  class field method event property set get permissionset addon removeon
 syn keyword ildasmModifier virtual instance final extends implements
 syn keyword ildasmSpecial  DependencyProperty
-"syn keyword ildasmHide     hidebysig
+syn keyword ildasmHide     hidebysig
 syn match   ildasmSet      "^ *.set \_.\{-})"
 syn match   ildasmGet      "^ *.get \_.\{-})"
 syn match   ildasmAddon    "^ *.addon \_.\{-})"
 syn match   ildasmRemoveon "^ *.removeon \_.\{-})"
-syn match   ildasmHide     "^.*hidebysig .*$\n\_.\{-}\n^$"
 syn match   ildasmIL       "IL_\x\x\x\x:.*$"
 syn match   ildasmKakko    "\[\a*\]"
 syn match   ildasmClass    "^[A-Z][a-zA-Z0-9.]*"
@@ -23,7 +22,6 @@ hi default link ildasmIgnore   Ignore
 hi default link ildasmKeyword  Type
 hi default link ildasmModifier Number
 hi default link ildasmSpecial  Special
-"hi default link ildasmHide     Error
 hi default link ildasmHide     Ignore
 hi default link ildasmIL       Ignore
 hi default link ildasmSet      Ignore
