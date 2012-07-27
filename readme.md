@@ -36,18 +36,22 @@ Usage
 -----
 * 起動
 次のコマンドで起動するとクラス一覧が表示される
+
 (初回起動後は遅いですが、キャッシュするので次回以降は早いはず)
 
     :Ildasm
 
 * クラス一覧
+
 クラス名の上でReturnキーを押すとクラス定義が表示されます。
 
 * クラス定義
+
 クラス名の上でReturnキーを押すとクラス定義が追加表示されます。
 Backspaceでクラス一覧に戻ります。
 
 * キャッシュのクリア
+
 一度ロードしたクラス一覧は~/.vim_ildasm にキャッシュします。
 これをクリアする場合は、次のコマンドを実行してください。
 
@@ -57,19 +61,23 @@ ScreenShots
 -----------
 
 * Visual Studioのオブジェクトブラウザ
+
     ![Visual Studio Object Browser](http://yuratomo.up.seesaa.net/image/object_browser.PNG "object browser")
 
 * Ildasm クラス一覧
+
     ![Ildasm Class List](http://yuratomo.up.seesaa.net/image/ildasm_classes.PNG "Class List")
 
 
 * Ildasm クラス定義
+
     ![Ildasm Class Define](http://yuratomo.up.seesaa.net/image/ildasm_classdefine.PNG "Class Define")
 
 
 HISTORY
 -------
 *v1.0 2012.07.27 yuratomo
+
 Initial version
 
 
