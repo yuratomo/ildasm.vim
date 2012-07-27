@@ -24,9 +24,9 @@ if !exists("g:ildasm_cache")
   let g:ildasm_cache = $home.'\\.vim_ildasm'
 endif
 
-command! -nargs=* Ildasm            :call ildasm#start(0)
-command! -nargs=* IldasmSplit       :call ildasm#start(1)
-command! -nargs=* IldasmClearChache :call ildasm#clearCache()
+command! -nargs=* Ildasm           :call ildasm#start(0)
+command! -nargs=* IldasmSplit      :call ildasm#start(1)
+command! -nargs=* IldasmClearCache :call ildasm#clearCache()
 
 let g:loaded_ildasm = 1
 
