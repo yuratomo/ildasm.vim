@@ -17,7 +17,7 @@ if exists('g:loaded_ildasm') && g:loaded_ildasm == 1
 endif
 
 if !exists('g:ildasm_command')
-  let g:ildasm_command = shellescape('ildasm.exe')
+  let g:ildasm_command = 'ildasm.exe'
 endif
 
 if !exists("g:ildasm_cache")

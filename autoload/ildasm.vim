@@ -26,7 +26,7 @@ function! s:usage()
 endfunction
 
 function! ildasm#start(mode)
-  if !filereadable(g:ildasm_command)
+  if !executable(g:ildasm_command)
     call s:message(g:ildasm_command . ' is not exists.')
     return
   endif
