@@ -29,8 +29,8 @@ function! ildasm#api#getClassInfo(path, class)
   let classname = substitute(a:class,'.*\.','','')
   let list = split(
     \ substitute(
-      \ substitute(s:system(cmd), '.ctor', classname, ''),
-      \ '.cctor', 'static ' . classname, ''),
+      \ substitute(s:system(cmd), '.ctor', classname, 'g'),
+      \ '.cctor', 'static ' . classname, 'g'),
     \ '\n')
   let on = 0
   let getset = 0
