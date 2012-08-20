@@ -5,12 +5,12 @@ elseif exists("b:current_syntax")
 endif
 
 source $VIMRUNTIME/syntax/cs.vim
-syn keyword ildasmIgnore   module assembly forwarder extern imagebase file stackreserve specialname rtspecialname cil managed auto ansi newslot runtime valuetype beforefieldinit literal native initonly sequential serializable
+"syn keyword ildasmIgnore   module assembly forwarder extern imagebase file stackreserve specialname rtspecialname cil managed auto ansi newslot runtime valuetype beforefieldinit literal native initonly sequential serializable
+"syn keyword ildasmModifier virtual instance final implements
+"syn keyword ildasmHide     hidebysig
 syn keyword ildasmKeyword  class field method event property set get permissionset addon removeon
-syn keyword ildasmModifier virtual instance final implements
 syn keyword ildasmExtends  extends
 syn keyword ildasmSpecial  DependencyProperty
-syn keyword ildasmHide     hidebysig
 syn match   ildasmSet      "^ *.set \_.\{-})"
 syn match   ildasmGet      "^ *.get \_.\{-})"
 syn match   ildasmAddon    "^ *.addon \_.\{-})"
