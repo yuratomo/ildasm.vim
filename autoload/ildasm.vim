@@ -131,6 +131,21 @@ function! ildasm#help()
     endif
 
     let word = cline[ s : e ]
+
+    let id = 1
+    while buflisted('w3m-' . id) != 0
+      let id += 1
+    endwhile
+    let winnum = winnr('$')
+    for winno in range(1, winnum)
+      let bn = bufname(winbufnr(winno))
+      if bn =~ 'w3m-*'
+         exe winno . "wincmd w"
+         exe ':W3m msdnl ' . word
+         return
+      endif
+    endfor
+
     exe ':W3mSplit msdnl ' . word
   endif
 endfunction
