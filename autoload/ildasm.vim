@@ -60,14 +60,8 @@ function! ildasm#open()
     let pos = col('.')
     let tline = getline(1)
     let cline = getline('.')
-    let s1 = strridx(cline, ' ', pos)
-    let s2 = strridx(cline, ']', pos)
-    if s1 > s2
-      let s = s1
-    else
-      let s = s2
-    endif
-    let e = stridx(cline, ' ', pos)
+    let s = s:matchr(cline, '[^a-zA-Z0-9_.]', pos)
+    let e = match(cline, '[^a-zA-Z0-9_.]', pos)
     if s == -1
       let s = 0
     else
@@ -119,6 +113,28 @@ function! ildasm#back()
   endif
 endfunction
 
+function! ildasm#help()
+  if exists('g:loaded_w3m') && g:loaded_w3m == 1
+    let pos = col('.')
+    let cline = getline('.')
+    let s = s:matchr(cline, '[^a-zA-Z0-9_.]', pos)
+    let e = match(cline, '[^a-zA-Z0-9_.]', pos)
+    if s == -1
+      let s = 0
+    else
+      let s += 1
+    endif
+    if e == -1
+      let e = len(cline) - 1
+    else
+      let e -= 1
+    endif
+
+    let word = cline[ s : e ]
+    exe ':W3mSplit msdnl ' . word
+  endif
+endfunction
+
 function! s:openWindow(mode)
   let id = 1
   while buflisted(s:ildasm_title_prefix . id)
@@ -138,6 +154,7 @@ function! s:openWindow(mode)
   augroup END
   nnoremap <buffer> <CR> :call ildasm#open()<CR>
   nnoremap <buffer> <BS> :call ildasm#back()<CR>
+  nnoremap <buffer> <F1> :call ildasm#help()<CR>
 endfunction
 
 function! s:list()
@@ -240,4 +257,18 @@ endfunction
 function s:message(msg)
   redraw
   echo 'ildasm: ' . a:msg
+endfunction
+
+function! s:matchr(line, pat, pos)
+  let idx = a:pos
+  if idx >= len(a:line)
+    let idx = len(a:line) - 1
+  endif
+  while idx >= 0
+    if a:line[idx] =~ a:pat
+      return idx
+    endif
+    let idx = idx - 1
+  endwhile
+  return -1
 endfunction
