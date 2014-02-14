@@ -261,7 +261,7 @@ function! s:load()
   return 1
 endfunction
 
-function ildasm#clearCache()
+function! ildasm#clearCache()
   if exists('g:assembly_list')
     unlet g:assembly_list
   endif
@@ -269,7 +269,7 @@ function ildasm#clearCache()
   call s:message('Cache cleared!!')
 endfunction
 
-function s:message(msg)
+function! s:message(msg)
   redraw
   echo 'ildasm: ' . a:msg
 endfunction
@@ -287,3 +287,191 @@ function! s:matchr(line, pat, pos)
   endwhile
   return -1
 endfunction
+
+" for dotnet-complete
+
+function! s:to_type(str)
+  return substitute(a:str, '.*\.', '', '')
+endfunction
+
+function! s:to_value(str)
+  return substitute(substitute(substitute(a:str, '()', '', ''), '.*\.', '', ''), "'", '', 'g')
+endfunction
+
+function! ildasm#xxx()
+  call s:openWindow(0)
+  setl modifiable
+  call clearmatches()
+  % delete _
+
+  for item in g:assembly_list
+    for class in item.classes
+      let lines = ildasm#api#getClassInfo(item.path, class)
+      if len(lines) > 0 && lines[1] =~ ".*System.Enum"
+        call setline(line('$') + 1, [ "call dotnet#enum('" . substitute(lines[0], '^.*[. ]', '', '') . "', [" ] )
+        redraw
+        let xxx = map(map(filter(lines, 'v:val =~ "="'), 'substitute(v:val, " = .*$", "\",\"\"),", "")'), 'substitute(v:val, "^.* ", "  \\\\ dotnet#prop(\"", "")')
+        call setline(line('$') + 1, xxx)
+        redraw
+        call setline(line('$') + 1, [ '  \ ])', '' ] )
+        redraw
+        redraw
+      endif
+    endfor
+  endfor
+endfunction
+
+function! s:normalize(str)
+  return substitute(substitute(substitute(a:str, ' \+', ' ', 'g'), '^ ', '', ''), ' $', '', '')
+endfunction
+
+function! ildasm#x()
+  
+  for item in g:assembly_list
+    for class in item.classes
+      let lines = ildasm#api#getClassInfo(item.path, class)
+      "let lines = ildasm#api#getClassInfo('C:\Program Files\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\Profile\Client\mscorlib.dll', 'System.IO.MemoryStream')
+      let find_class = 0
+      let class_name = ''
+      let type_name = ''
+      let signature = ''
+      let retvalue = ''
+      let methods = {}
+      let mnow = 0
+      let vnow = 0
+      let enow = 0
+      if len(lines) > 0 && lines[1] =~ ".*System.Enum"
+        continue
+      endif
+      for line in lines
+
+        if line =~ '[<>`]'
+          let line = substitute(line, '`.*>', '', '')
+          let line = substitute(line, '<.*>', '', '')
+        endif
+
+        if mnow == 1
+          if value_name == '' && line =~ '('
+            let value_name = s:func(line)
+            let signature = substitute(line, '^.*(', '', '')
+            let retvalue .= substitute(line, '\<\w\+(.*', '', '')
+          else
+            let signature .= line
+          endif
+
+          if line =~ ')' || line == ''
+            if value_name != '' && value_name != '(' && !has_key(methods, value_name . signature)
+              call setline(line('$') + 1, "  \\ dotnet#method('" . value_name . "', '" . s:normalize(signature) .  "', '" . s:normalize(retvalue) . "'),")
+              let methods[value_name] = ''
+            endif
+            let mnow = 0
+          endif
+
+          continue
+        endif
+
+        if vnow == 1
+          let value_name = s:to_value(substitute(line, '^ *', '', ''))
+          call setline(line('$') + 1, "  \\ dotnet#prop('" . value_name . "', '" . s:to_type(type_name) . "'),")
+          let vnow = 0
+          continue
+        endif
+
+        if enow == 1
+          let value_name = s:to_value(substitute(line, '^ *', '', ''))
+          call setline(line('$') + 1, "  \\ dotnet#event('" . value_name . "', '" . s:to_type(type_name) . "'),")
+          let enow = 0
+          continue
+        endif
+
+        if line =~ '^\.class'
+          let class_name = substitute(line, '^.*[. ]', '', '')
+          "let namespace  = substitute(substitute(line, '^.* ', '', ''), '\..\{-\}$', '', '')
+          let namespace  = substitute(line, '^.* ', '', '')
+          let start = strridx(namespace, '.')
+          let namespace = namespace[0 : start - 1]
+        elseif line =~ '^       extends'
+          let super_class = substitute(line, '       extends ', '', '')
+          exe 'edit ' . namespace
+          call setline(line('$') + 1, "call dotnet#class('" . class_name . "', '" . s:to_type(super_class) . "', [ " )
+          let find_class = 1
+          let methods = {}
+        endif
+
+        if find_class == 0
+          continue
+        endif
+
+        if line =~ '  \.method'
+          if line =~ '('
+            let value_name = s:func(line)
+            let signature = substitute(line, '^.*(', '', '')
+            let retvalue = substitute(substitute(line, '.*public ', '', ''), '\<\w\+(.*', '', '')
+            let mnow = 1
+          else
+            let value_name = ''
+            let signature = ''
+            let retvalue = substitute(line, '.*public ', '', '')
+            let mnow = 1
+            continue
+          endif
+        endif
+
+        if line =~ '  \.property'
+          let part = split(line, ' ')
+          if len(part) > 2
+            call setline(line('$') + 1, "  \\ dotnet#prop('" . s:to_value(part[2]) . "', '" . s:to_type(part[1]) . "'),")
+          elseif len(part) > 1
+            let vnow = 1
+            let type_name = part[1]
+            continue
+          else
+            continue
+          endif
+        endif
+
+        if line =~ ' \.event'
+          let part = split(line, '[. ]')
+          if len(part) > 2
+            call setline(line('$') + 1, "  \\ dotnet#event('" . s:to_value(part[-1]) . "', '" . s:to_type(part[-2]) . "'),")
+          elseif len(part) > 1
+            let enow = 1
+            let type_name = part[1]
+            continue
+          else
+            continue
+          endif
+        endif
+
+        if line =~ ' \.field' && line !~ ' static '
+          let part = split(line, ' ')
+          call setline(line('$') + 1, "  \\ dotnet#field('" . s:to_value(part[-1]) . "', '" . s:to_type(part[-2]) . "'),")
+        endif
+
+        redraw
+      endfor
+      if find_class == 1
+        call setline(line('$') + 1, [ '  \ ])', '' ] )
+      endif
+      exe ':w'
+    endfor
+  endfor
+endfunction
+
+function! s:func(line)
+  let ed = stridx(a:line, '(')
+  if ed >= 0
+    let st1 = strridx(a:line, ' ', ed)
+    let st2 = strridx(a:line, '.', ed)
+    if st1 > st2
+      let st = st1
+    else
+      let st = st2
+    endif
+    if st >= 0
+      return substitute(a:line[ st + 1 : ed ], "'(", '(', '')
+    endif
+  endif
+  return ''
+endfunction
+

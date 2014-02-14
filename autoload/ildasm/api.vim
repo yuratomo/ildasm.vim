@@ -12,54 +12,58 @@ function! ildasm#api#getClassList(path)
 endfunction
 
 function! ildasm#api#getClassInfo(path, class)
-  let cmd = join( [
-    \ g:ildasm_command,
-    \ shellescape(a:path),
-    \ '/ITEM:' . a:class ,
-    \ '/TEXT',
-    \ '/NOCA',
-    \ '|findstr /V {',
-    \ '|findstr /V }',
-    \ '|findstr /V \/\/',
-    \ '|findstr /V .maxstack',
-    \ ],  ' ')
+  try
+    let cmd = join( [
+      \ g:ildasm_command,
+      \ shellescape(a:path),
+      \ '/ITEM:' . a:class ,
+      \ '/TEXT',
+      \ '/NOCA',
+      \ '|findstr /V {',
+      \ '|findstr /V }',
+      \ '|findstr /V \/\/',
+      \ '|findstr /V .maxstack',
+      \ ],  ' ')
 
-  " negrect
-  let nlist = []
-  let classname = substitute(a:class,'.*\.','','')
-  let list = split(
-    \ substitute(
-      \ substitute(s:system(cmd), '.ctor', classname, 'g'),
-      \ '.cctor', 'static ' . classname, 'g'),
-    \ '\n')
-  let on = 0
-  let getset = 0
-  for item in list
-    if item =~ 'IL_\x\x\x\x:.*$'
-      let on = 1
-    elseif item =~ '^ \+.get ' || item =~ '^ \+.set ' || item =~ '^ \+.addon ' || item =~ '^ \+.removeon '
-      let on = 1
-      let getset = 1
-    endif
-    if on == 0
-      call add(nlist, s:negrect(item))
-    endif
-    if getset == 1
-      let on = 0
-      let getset = 0
-      if nlist[-1] != ''
-        call add(nlist, '')
+    " negrect
+    let nlist = []
+    let classname = substitute(a:class,'.*\.','','')
+    let list = split(
+      \ substitute(
+        \ substitute(s:system(cmd), '.ctor', classname, 'g'),
+        \ '.cctor', 'static ' . classname, 'g'),
+      \ '\n')
+    let on = 0
+    let getset = 0
+    for item in list
+      if item =~ 'IL_\x\x\x\x:.*$'
+        let on = 1
+      elseif item =~ '^ \+.get ' || item =~ '^ \+.set ' || item =~ '^ \+.addon ' || item =~ '^ \+.removeon '
+        let on = 1
+        let getset = 1
       endif
-    endif
-    if item == ""
-      let on = 0
-    endif
-  endfor
+      if on == 0
+        call add(nlist, s:negrect(item))
+      endif
+      if getset == 1
+        let on = 0
+        let getset = 0
+        if nlist[-1] != ''
+          call add(nlist, '')
+        endif
+      endif
+      if item == ""
+        let on = 0
+      endif
+    endfor
 
-  " insert class
-  let nlist[0] = '.class ' . nlist[0][1:]
+    " insert class
+    let nlist[0] = '.class ' . nlist[0][1:]
 
-  return nlist
+    return nlist
+  catch /.*/
+    return []
+  endtry
 endfunction
 
 let s:negrect_words = join(map([
