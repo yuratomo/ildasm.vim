@@ -1,5 +1,10 @@
 
 function! ildasm#api#getClassList(path)
+  let ssl = &shellslash
+  if ssl == 1
+    setl noshellslash
+  endif
+
   let cmd = join( [ 
     \ g:ildasm_command, 
     \ shellescape(a:path), 
@@ -8,11 +13,20 @@ function! ildasm#api#getClassList(path)
     \ '|findstr \.class ',
     \ '|findstr /V Enumerator',
     \ ],  ' ')
+
+  if ssl == 1
+    setl shellslash
+  endif
   return map(map(split(s:system(cmd), '\n'), 'substitute(v:val, "\d*<.*>", "", "")'), 'substitute(v:val, ".* ", "", "")')
 endfunction
 
 function! ildasm#api#getClassInfo(path, class)
   try
+    let ssl = &shellslash
+    if ssl == 1
+      setl noshellslash
+    endif
+
     let cmd = join( [
       \ g:ildasm_command,
       \ shellescape(a:path),
@@ -24,6 +38,10 @@ function! ildasm#api#getClassInfo(path, class)
       \ '|findstr /V \/\/',
       \ '|findstr /V .maxstack',
       \ ],  ' ')
+
+    if ssl == 1
+      setl shellslash
+    endif
 
     " negrect
     let nlist = []
